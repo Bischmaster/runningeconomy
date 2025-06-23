@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laufökonomie-Rechner</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 30px;
+      border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, button { width: 100%; padding: 10px; margin-top: 5px;
+      box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .result { margin-top: 20px; font-size: 18px; text-align: center; }
+    .hint { margin-top: 10px; font-size: 14px; color: #555; }
+    .evaluation { margin-top: 15px; font-size: 16px; text-align: center; color: #333; }
+    canvas { margin-top: 20px; width: 100%; height: 300px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Laufökonomie-Rechner</h1>
+
+  <label for="vo2abs">VO₂ absolut (ml/min)</label>
+  <input type="number" id="vo2abs" placeholder="z. B. 3600" step="any"/>
+
+  <label for="weight">Körpergewicht (kg)</label>
+  <input type="number" id="weight" placeholder="z. B. 70" step="any"/>
+
+  <label for="speedKmh">Geschwindigkeit (km/h)</label>
+  <input type="number" id="speedKmh" placeholder="z. B. 13" step="any"/>
+
+  <button onclick="calculateRE()">Berechnen</button>
+
+  <div id="result" class="result"></div>
+  <div id="evaluation" class="evaluation"></div>
+  <div class="hint">
+    Sehr gute Ökonomie: <8 │ Gut: 9–11 │ Schlecht: >15 ml/kg/min·m/s
+  </div>
+
+  <canvas id="reChart"></canvas>
+</div>
+
+<script>
+  const chartCtx = document.getElementById('reChart').getContext('2d');
+  const reChart = new Chart(chartCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: 'VO₂ (ml/kg/min)',
+          data: [],
+          borderColor: '#007bff',
+          fill: false
+        },
+        {
+          label: 'Laufökonomie (ml/kg/min·m/s)',
+          data: [],
+          borderColor: '#28a745',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Messung' } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+
+  let count = 1;
+
+  function calculateRE() {
+    const vo2abs = parseFloat(document.getElementById('vo2abs').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+    const speedKmh = parseFloat(document.getElementById('speedKmh').value);
+    const el = document.getElementById('result');
+    const ev = document.getElementById('evaluation');
+
+    if (isNaN(vo2abs) || isNaN(weight) || isNaN(speedKmh) || vo2abs <= 0 || weight <= 0 || speedKmh <= 0) {
+      el.textContent = 'Bitte gültige Werte eingeben.';
+      ev.textContent = '';
+      return;
+    }
+
+    const vo2 = vo2abs / weight; // VO2 relative (ml/kg/min)
+    const speedMs = speedKmh / 3.6;
+    const economy = vo2 / speedMs;
+
+    let evaluation = '';
+    if (economy < 8) {
+      evaluation = 'Ausgezeichnete Laufökonomie – sehr effizient!';
+    } else if (economy >= 8 && economy <= 11) {
+      evaluation = 'Gute Laufökonomie – du bist auf einem sehr soliden Niveau.';
+    } else if (economy > 11 && economy <= 15) {
+      evaluation = 'Mittelmäßige Laufökonomie – da ist noch Potenzial!';
+    } else {
+      evaluation = 'Schwache Laufökonomie – Verbesserung durch Technik- und Krafttraining möglich.';
+    }
+
+    el.innerHTML = `
+      VO₂ relativ: ${vo2.toFixed(2)} ml/kg/min<br/>
+      Geschwindigkeit: ${speedMs.toFixed(2)} m/s<br/>
+      Laufökonomie: <strong>${economy.toFixed(2)} ml/kg/min·m/s</strong>
+    `;
+    ev.textContent = evaluation;
+
+    // Update chart
+    reChart.data.labels.push(`Messung ${count++}`);
+    reChart.data.datasets[0].data.push(vo2);
+    reChart.data.datasets[1].data.push(economy);
+    reChart.update();
+  }
+</script>
+
+</body>
+</html>
