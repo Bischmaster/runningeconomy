@@ -19,6 +19,7 @@
     .hint { margin-top: 10px; font-size: 14px; color: #555; }
     .evaluation { margin-top: 15px; font-size: 16px; text-align: center; color: #333; }
     canvas { margin-top: 20px; width: 100%; height: 300px; }
+    .scale { margin-top: 20px; font-size: 14px; color: #222; background: #eef; padding: 10px; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -39,8 +40,16 @@
 
   <div id="result" class="result"></div>
   <div id="evaluation" class="evaluation"></div>
-  <div class="hint">
-    Sehr gute Ökonomie: <8 │ Gut: 9–11 │ Schlecht: >15 ml/kg/min·m/s
+
+  <div class="scale">
+    <strong>Bewertungsskala Laufökonomie (ml/kg/min·m/s):</strong><br/>
+    <ul>
+      <li><strong>&lt; 8</strong>: Weltklasse / herausragend</li>
+      <li><strong>8 – 10</strong>: Sehr gut (Elite-Level)</li>
+      <li><strong>10 – 12</strong>: Gut – sehr gut (ambitioniert)</li>
+      <li><strong>12 – 14</strong>: Durchschnittlich (trainiert)</li>
+      <li><strong>&gt; 14</strong>: Verbessern durch Technik & Krafttraining</li>
+    </ul>
   </div>
 
   <canvas id="reChart"></canvas>
@@ -97,13 +106,15 @@
 
     let evaluation = '';
     if (economy < 8) {
-      evaluation = 'Ausgezeichnete Laufökonomie – sehr effizient!';
-    } else if (economy >= 8 && economy <= 11) {
-      evaluation = 'Gute Laufökonomie – du bist auf einem sehr soliden Niveau.';
-    } else if (economy > 11 && economy <= 15) {
-      evaluation = 'Mittelmäßige Laufökonomie – da ist noch Potenzial!';
+      evaluation = '🏆 Weltklasse / herausragend';
+    } else if (economy >= 8 && economy < 10) {
+      evaluation = '💪 Sehr gut (Elite-Level)';
+    } else if (economy >= 10 && economy < 12) {
+      evaluation = '✅ Gut – sehr gut (ambitioniert)';
+    } else if (economy >= 12 && economy < 14) {
+      evaluation = '➖ Durchschnittlich (trainiert)';
     } else {
-      evaluation = 'Schwache Laufökonomie – Verbesserung durch Technik- und Krafttraining möglich.';
+      evaluation = '⚠️ Verbessern durch Technik & Krafttraining empfohlen';
     }
 
     el.innerHTML = `
